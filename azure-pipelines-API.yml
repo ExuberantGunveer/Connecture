@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 pool:
-  Agent.Name: 'AWSVSQAA701'
+  vmImage: "windows-latest"
 
 variables:
 - group: ToolsAPI_QA_Environment
