@@ -4,20 +4,26 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 pool:
-  name: Build
-  demands:
-  - Agent.Name -equals AWSVSQAA701
+  Agent.Name: 'AWSVSQAA701'
+
+variables:
+- group: ToolsAPI_QA_Environment
 
 steps:
-# clean up daemons
-- task: Gradle@2
+- task: replacetokens@5
   inputs:
-    gradleWrapperFile: 'gradlew'
-    javaHomeOption: 'JDKVersion'
-    gradleOptions: '-Xmx12288m'
-    publishJUnitResults: false
-    testResultsFiles: '**/TEST-*.xml'
-    tasks: "--stop"
+    rootDirectory: '$(System.DefaultWorkingDirectory)/src/test/java/api/tests/config/'
+    targetFiles: '**/*env.properties'
+    encoding: 'auto'
+    tokenPattern: 'default'
+    writeBOM: true
+    actionOnMissing: 'warn'
+    keepToken: false
+    actionOnNoFiles: 'continue'
+    enableTransforms: false
+    enableRecursion: false
+    useLegacyPattern: false
+    enableTelemetry: true
 
 - task: Gradle@2
   inputs:
@@ -26,19 +32,16 @@ steps:
     gradleOptions: '-Xmx12288m'
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
-    tasks: "clean debugDeployTest -DdebugSingle=Consumer_ConfirmationSpec --rerun-tasks --stacktrace"
+    tasks: 'clean toolsApiTests --rerun-tasks --stacktrace --continue --info --debug'
 
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
-    searchFolder: './build/reports/'
     testResultsFiles: '**/TEST-*.xml'
-    failTaskOnFailedTests: true
-    publishRunAttachments: true
-    testRunTitle: 'QA - UI Regression Tests'
-    
+    mergeTestResults: true
+    testRunTitle: 'QA - API Tests'
+
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: './test-output/junitreports/'  # for images
-    ArtifactName: 'TestScreenshots'
-    publishLocation: 'Container'
+    ArtifactName: 'Extent-Reports'
+    PathToPublish: './target/Extent-Reports/'
