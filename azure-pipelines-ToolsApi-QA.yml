@@ -7,7 +7,7 @@ pool:
   Agent.Name: 'AWSVSQAA701'
 
 variables:
-- group: ToolsAPI_QA_Environment
+- group: Tools_API_QA
 
 steps:
 - task: replacetokens@5
